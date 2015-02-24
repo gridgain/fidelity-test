@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    _________        _____ __________________        _____
+    __  ____/___________(_)______  /__  ____/______ ____(_)_______
+    _  / __  __  ___/__  / _  __  / _  / __  _  __ `/__  / __  __ \
+    / /_/ /  _  /    _  /  / /_/ /  / /_/ /  / /_/ / _  /  _  / / /
+    \____/   /_/     /_/   \_,__/   \____/   \__,_/  /_/   /_/ /_/
+
+    Copyright (C) GridGain Systems. All Rights Reserved.
+-->
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <groupId>org.gridgain</groupId>
+    <artifactId>gridgain-fabric-ent</artifactId>
+    <version>6.6.2</version>
+    <packaging>pom</packaging>
+
+    <name>GridGain Data Fabric Enterprise Edition</name>
+    <url>http://www.gridgain.com</url>
+    <description>Java-based middleware for in-memory processing of big data in a distributed environment.</description>
+
+    <licenses>
+        <license>
+            <name>GridGain 6.0 - EULA</name>
+            <url>http://www.gridgain.com/documentation/license/</url>
+        </license>
+    </licenses>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.gridgain</groupId>
+            <artifactId>gridgain-core-ent</artifactId>
+            <version>6.6.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridgain</groupId>
+            <artifactId>gridgain-indexing</artifactId>
+            <version>6.6.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridgain</groupId>
+            <artifactId>gridgain-spring</artifactId>
+            <version>6.6.2</version>
+        </dependency>
+    </dependencies>
+</project>

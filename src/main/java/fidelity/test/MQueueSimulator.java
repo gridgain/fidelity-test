@@ -13,14 +13,17 @@ public class MQueueSimulator {
 
     private static final String TOPIC = "CACHE_INVALIDATE";
 
-    public static void main(String[] args) throws GridException {
-        try (Grid grid = GridGain.start(args[0])) {
+    public void start(String cfgPath) throws GridException, InterruptedException {
+        try (Grid grid = GridGain.start(cfgPath)) {
             GridMessaging messaging = grid.forRemotes().message();
 
             messaging.remoteListen(TOPIC, new Listener()).get();
 
-            while (true)
+            while (true) {
+                Thread.sleep(200);
+
                 messaging.sendOrdered(TOPIC, RND.nextInt(1000), 0);
+            }
         }
     }
 
@@ -32,6 +35,8 @@ public class MQueueSimulator {
             GridCache<Integer, Position> cache = grid.cache("partitioned");
 
             cache.clear(key);
+
+            System.out.println(">>> Invalidated key: " + key);
 
             return true;
         }
