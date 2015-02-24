@@ -72,7 +72,7 @@ public class App {
 
                             System.out.println();
                             System.out.println(">>> Throughput: " + cnt0 + " ops/sec.");
-                            System.out.println(">>> Average latency: " + (totalDur0 / cnt0) + " nanos.");
+                            System.out.println(">>> Average latency: " + (((double)totalDur0 / 1000000) / cnt0) + " ms.");
                         }
 
                         return null;
