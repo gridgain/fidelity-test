@@ -2,52 +2,85 @@ package fidelity.test;
 
 import org.gridgain.grid.*;
 import org.gridgain.grid.cache.*;
+import org.jdk8.backport.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class App {
+    private static final int DFLT_THREAD_CNT = 8;
+
     private static final Random RND = new Random();
 
-    public static void main(String[] args) throws GridException {
+    public static void main(String[] args) throws GridException, InterruptedException {
         if (args.length > 0 && "--mqueue".equals(args[0])) {
             new MQueueSimulator().start("example-cache-client.xml");
         }
         else {
-            MainFrame mainFrame = new MainFrame();
+            int threadCnt = DFLT_THREAD_CNT;
+
+            if (args.length > 0)
+                threadCnt = Integer.parseInt(args[0]);
+
+            final MainFrame mainFrame = new MainFrame();
 
             try (Grid grid = GridGain.start("example-cache-client.xml")) {
-                GridCache<Integer, Position> cache = grid.cache("partitioned");
+                final GridCache<Integer, Position> cache = grid.cache("partitioned");
 
-                long totalDur = 0;
-                long cnt = 0;
+                System.out.println();
+                System.out.println(">>> Number of threads: " + threadCnt);
 
-                while (true) {
-                    int key = RND.nextInt(1000);
+                ExecutorService exec = Executors.newFixedThreadPool(threadCnt + 1);
 
-                    long s = System.nanoTime();
+                final LongAdder totalDur = new LongAdder();
+                final LongAdder cnt = new LongAdder();
 
-                    Position position = cache.get(key);
+                for (int i = 0; i < threadCnt; i++) {
+                    exec.submit(new Callable<Object>() {
+                        @Override public Object call() throws Exception {
+                            while (!Thread.currentThread().isInterrupted()) {
+                                int key = RND.nextInt(1000);
 
-                    if (position == null) {
-                        position = mainFrame.position();
+                                long s = System.nanoTime();
 
-                        cache.putx(key, position);
-                    }
+                                Position position = cache.get(key);
 
-                    long dur = System.nanoTime() - s;
+                                if (position == null) {
+                                    position = mainFrame.position();
 
-                    totalDur += dur;
-                    cnt++;
+                                    cache.putx(key, position);
+                                }
 
-                    if (cnt == 10000) {
-                        double avg = totalDur / cnt;
+                                long dur = System.nanoTime() - s;
 
-                        System.out.println(">>> Average latency: " + avg + " nanos.");
+                                totalDur.add(dur);
+                                cnt.increment();
+                            }
 
-                        totalDur = 0;
-                        cnt = 0;
-                    }
+                            return null;
+                        }
+                    });
                 }
+
+                exec.submit(new Callable<Object>() {
+                    @Override public Object call() throws Exception {
+                        while (!Thread.currentThread().isInterrupted()) {
+                            Thread.sleep(1000);
+
+                            long totalDur0 = totalDur.sumThenReset();
+                            long cnt0 = cnt.sumThenReset();
+
+                            System.out.println();
+                            System.out.println(">>> Throughput: " + cnt0 + " ops/sec.");
+                            System.out.println(">>> Average latency: " + (totalDur0 / cnt0) + " nanos.");
+                        }
+
+                        return null;
+                    }
+                });
+
+                exec.shutdown();
+                exec.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
             }
         }
     }
